@@ -109,8 +109,10 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *) props
         int minuteInterval = [RCTConvert int:[props objectForKey:@"minuteInterval"]];
         [picker setMinuteInterval:minuteInterval];
 
-        NSTimeZone* timezone = [RCTConvert NSTimeZone:[props valueForKey:@"timeZoneOffsetInMinutes"]];
-        [picker setTimeZone:timezone];
+        NSString * timeZoneProp = [props valueForKey:@"timeZoneOffsetInMinutes"];
+        if(timeZoneProp){
+            [picker setTimeZone:[RCTConvert NSTimeZone:timeZoneProp]];
+        }
         
         [alertView addSubview:picker];
         
@@ -137,7 +139,13 @@ RCT_EXPORT_METHOD(openPicker:(NSDictionary *) props
             [popPresenter setPermittedArrowDirections: (UIPopoverArrowDirection) 0];
         }
         
-        [rootViewController presentViewController:alertController animated:YES completion:nil];
+        // Finding the top view controller which is neccessary to be able to show the picker from within modal
+        UIViewController *topViewController = rootViewController;
+        while (topViewController.presentedViewController){
+            topViewController = topViewController.presentedViewController;
+        }
+        
+        [topViewController presentViewController:alertController animated:YES completion:nil];
     });
 
 }
